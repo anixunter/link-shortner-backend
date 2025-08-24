@@ -26,6 +26,7 @@ from drf_spectacular.views import (
     SpectacularSwaggerView,
     SpectacularRedocView,
 )
+from core.apps.shortner.views import RedirectView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -41,7 +42,8 @@ urlpatterns = [
     path('auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('auth/token/refresh/', TokenRefreshView.as_view(), name='token_refesh'),
     path('user/', include('core.apps.common.urls')),
-    path('', include('core.apps.shortner.urls')),
+    path('link/', include('core.apps.shortner.urls')),
+    path('<str:short_code>/', RedirectView.as_view(), name='redirect'),
 ]
 
 # Only add debug toolbar in development

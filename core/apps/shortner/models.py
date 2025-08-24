@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 class LinkShortner(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     original_link = models.URLField(max_length=500)
-    short_code = models.CharField(max_length=10, unique=True)
+    short_code = models.CharField(max_length=10, unique=True, db_index=True)
     clicks = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     

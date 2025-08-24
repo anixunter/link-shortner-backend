@@ -1,7 +1,9 @@
 from django.urls import path
-from core.apps.shortner.views import LinkShortnerCreateView, UserLinksListView
+from rest_framework.routers import DefaultRouter
+from core.apps.shortner.views import LinkShortnerViewSet
 
-urlpatterns = [
-    path('create/', LinkShortnerCreateView.as_view(), name='create-link'),
-    path('', UserLinksListView.as_view(), name='user-links'),
-]
+router = DefaultRouter()
+
+router.register('', LinkShortnerViewSet, basename='link')
+
+urlpatterns = router.urls

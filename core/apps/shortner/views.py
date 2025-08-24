@@ -1,7 +1,7 @@
 import string
 import random
 from django.shortcuts import redirect, get_object_or_404
-from rest_framework import generics, status, permissions
+from rest_framework import generics, viewsets, status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -16,10 +16,12 @@ def _generate_short_code(length=6):
         if not LinkShortner.objects.filter(short_code=code).exists():
             return code
 
-class LinkShortnerCreateView(generics.CreateAPIView):
-    queryset = LinkShortner.objects.all()
+class LinkShortnerViewSet(viewsets.ModelViewSet):
     serializer_class = LinkShortnerSerializer
     permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        return LinkShortner.objects.filter(user=self.request.user).select_related('user')
     
     def perform_create(self, serializer):
         short_code = serializer.validated_data.get('short_code')
@@ -27,18 +29,11 @@ class LinkShortnerCreateView(generics.CreateAPIView):
             short_code = _generate_short_code()
         
         serializer.save(user=self.request.user, short_code=short_code)
-
-
-
-class UserLinksListView(generics.ListAPIView):
-    serializer_class = LinkShortnerSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    
-    def get_queryset(self):
-        return LinkShortner.objects.filter(user=self.request.user).select_related('user')
     
 
 class RedirectView(APIView):
+    permission_classes = [permissions.AllowAny]
+    
     def get(self, request, short_code):
         try:
             link = get_object_or_404(LinkShortner, short_code=short_code)

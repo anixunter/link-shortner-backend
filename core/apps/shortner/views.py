@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.apps.shortner.models import LinkShortner
-from core.apps.shortner.serializers import LinkShortnerSerializer
+from core.apps.shortner.serializers import LinkShortnerSerializer, LinkLookUpSerializer
 
 
 def _generate_short_code(length=6):
@@ -31,7 +31,12 @@ class LinkShortnerViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user, short_code=short_code)
     
 
-class RedirectView(APIView):
+class LinkLookUpView(APIView):
+    """
+    An API endpoint for the frontend to look up a short code.
+    It returns the original URL for redirection or a 404.
+    """
+    serializer_class = LinkLookUpSerializer
     permission_classes = [permissions.AllowAny]
     
     def get(self, request, short_code):
@@ -39,8 +44,22 @@ class RedirectView(APIView):
             link = get_object_or_404(LinkShortner, short_code=short_code)
             link.clicks += 1
             link.save(update_fields=['clicks'])
-            return redirect(link.original_link)
+            # return original link in a json response
+            return Response({'original_link': link.original_link}, status=status.HTTP_200_OK)
         except LinkShortner.DoesNotExist:
-            return Response({"error": "Short link not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': "Short link not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+# class RedirectView(APIView):
+#     permission_classes = [permissions.AllowAny]
+    
+#     def get(self, request, short_code):
+#         try:
+#             link = get_object_or_404(LinkShortner, short_code=short_code)
+#             link.clicks += 1
+#             link.save(update_fields=['clicks'])
+#             return redirect(link.original_link)
+#         except LinkShortner.DoesNotExist:
+#             return Response({"error": "Short link not found"}, status=status.HTTP_404_NOT_FOUND)
 
 

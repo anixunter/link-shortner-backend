@@ -6,6 +6,9 @@ class LinkShortnerSerializer(serializers.ModelSerializer):
         model = LinkShortner
         fields = '__all__'
         read_only_fields = ['user', 'clicks', 'created_at']
+        extra_kwargs = {
+            'short_code': {'required': False}
+        }
         
 
 class LinkLookUpSerializer(serializers.Serializer):
